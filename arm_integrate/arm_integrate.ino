@@ -21,7 +21,7 @@ void setup() {
 
   hand_grip.write(90);
   hand_roll.write(90);
-  hand_pivot.write(70);
+  hand_pivot.write(90);
   elbow.write(160);
   shoulder.writeMicroseconds(map(0, -45, 180+45, 500, 2500));
 
