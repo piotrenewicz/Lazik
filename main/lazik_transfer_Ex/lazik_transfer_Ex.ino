@@ -27,11 +27,12 @@ struct RECEIVE_DATA_STRUCTURE{
 RECEIVE_DATA_STRUCTURE command;
 
 void setup(){
+  pinMode(13, OUTPUT);
   Serial.begin(9600);
   //start the library, pass in the data details and the name of the serial port. Can be Serial, Serial1, Serial2, etc. 
   ET.begin(details(command), &Serial);
   
-  pinMode(13, OUTPUT);
+  
   
 }
 
@@ -40,10 +41,9 @@ void loop(){
   if(ET.receiveData()){
     //this is how you access the variables. [name of the group].[variable name]
     //since we have data, we will blink it out. 
-     DATA PROCESSING HERE
-    }
+    digitalWrite(13, command.arm_power);
   }
   
   //you should make this delay shorter then your transmit delay or else messages could be lost
-  delay(250);
+  delay(60);
 }
