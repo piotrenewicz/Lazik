@@ -1,4 +1,5 @@
 #include <EasyTransfer.h>
+#include <Esplora.h>
 
 //create object
 EasyTransfer ET; 
@@ -39,7 +40,7 @@ void loop(){
   //this is how you access the variables. [name of the group].[variable name]
 
 
-  DATA PROCESSING HERE
+  command.arm_power = Esplora.readButton(SWITCH_DOWN);
   
   //send the data
   ET.sendData();
@@ -47,5 +48,5 @@ void loop(){
   //Just for fun, we will blink it out too
   
   
-  delay(5000);
+  delay(120);
 }
