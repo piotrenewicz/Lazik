@@ -19,31 +19,31 @@ struct SEND_DATA_STRUCTURE {
   int16_t drive;   // -512 -- 0 -- 512
   int16_t turn;    // -512 -- 0 -- 512
 
-  bool drive_power;
   bool arm_power;
-
-  int16_t custom;
 };
 SEND_DATA_STRUCTURE command;
 
 
 void setup() {
-  initialize_command();
-
-  //  do not use the usb serial, ... Best way to avoid corrupting the bootloader
+  initialize_command(); //do not use the usb serial, ... Best way to avoid corrupting the bootloader
   Serial1.begin(9600);
   ET.begin(details(command), &Serial1);
-
   pinMode(13, OUTPUT);
+}
 
+
+void loop() {
+  primary_control_junction();
+  ET.sendData();
+  delay(40);
 }
 
 
 void initialize_command() {
   init_target();
   
-  command.grip = 0.0;
-  command.twist = 0.0;
+  command.grip = 512;
+  command.twist = 512;
 
   command.drive = 0;
   command.turn = 0;
@@ -59,11 +59,7 @@ void init_target(){
 }
 
 
-void loop() {
-  primary_control_junction();
-  ET.sendData();
-  delay(120);
-}
+
 
 int menu_mode = 0;
 /*
