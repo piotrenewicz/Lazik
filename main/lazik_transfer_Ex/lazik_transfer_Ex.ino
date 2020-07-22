@@ -1,5 +1,6 @@
 #include <EasyTransfer.h>
 #include <Servo.h>
+#include <math.h>
 
 EasyTransfer ET; 
 
@@ -113,12 +114,52 @@ void arm_power_ctrl(){
 };
 
 void arm_model_calc(){
+  // welcome
+  const int a = 110;
+  const int b = 110; 
+  const int c = 100;  // to change
+
   
+  float bx = command.target_x + cos(command.deg_a) * (command.len_a + c);
+  float by = command.target_y + sin(command.deg_a) * (command.len_a + c);
+
+  float f  = sqrt(pow(bx, 2) + pow(by, 2));
+
+  float beta;
+  float beta3 = M_PI/2 - command.deg_a;
+  float beta2;
+  float beta1 = acos((f/b + b/f + pow(a,2)/(f*b))/2);
+  
+  if(by == 0){
+    beta2 = M_PI/2;
+  }
+  else if(by > 0){
+    beta2 = atan2(by, -bx) - M_PI/2;
+  }
+  else{
+    beta2 = atan2(by, -bx) + M_PI/2;
+  }
+  
+  beta = beta1 + beta2 + beta3;
+  
+  float gamma = acos((a/b + b/a + (pow(bx, 2) + pow(by, 2))/(a*b))/2);
+
+  float delta3 = M_PI/2 - beta2;
+  float delta2 = M_PI - beta1 - gamma;
+  float delta = M_PI - delta2 - delta3;
+
+  signals.wrist = beta;
+  signals.elbow = gamma;
+  signals.shoulder = delta;
 };
 
 void arm_writer(){
   servo_grip.writeMicroseconds(map(command.grip, 0, 1024, 600, 2260));
   servo_twist.writeMicroseconds(map(command.twist, 0, 1024, 630, 2460));
+
+  servo_wrist.writeMicroseconds(map(signals.wrist, M_PI/2, 3*M_PI/2, 540, 2300));
+  servo_elbow.writeMicroseconds(map(signals.elbow, 0, M_PI, 550, 2370));
+  servo_shoulder.writeMicroseconds(map(signals.shoulder, 0, M_PI, 500, 2500));
 };
 
 void arm_attach() {
