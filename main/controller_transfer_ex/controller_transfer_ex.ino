@@ -67,58 +67,35 @@ int menu_mode = 0;
  *  joystick will control driving, (no input will mean a detach) ^
  *  slider will control grip ^
  *  BL will set arm to default pos (grip not included) ^
- *  BR will send custom 1 (detach arm) ^
- *  BR again will send custom 2 (attach arm) ^
+ *  BD will set arm to rest pos
+ *  BR will toggle arm_power ^
  *  BU will change mode to 1 ^
  *  
- * Mode 1 - Basic arm mode,
- *  joystick will move the target, xy, ^
+ * Mode 1 - Arm mode, (LED 13 is on in this mode)
+ *  joystick(A) will move the target, xy, ^
  *  slider will control grip ^
  *  BU will change mode to 0 ^
- *  BD will change mode to 2 ^
+ *  BD will change behaviour of joystick(B), to control distance and attack angle
+ *  BL BR will control twist LR over time held.
  *  
- * Mode 2 - Full arm mode, (led on esplora is lit in this mode)
- *  slider does nothing, this allows it to be prepared for custom
- *  BU will change mode to 0
- *  BD will change mode to 1
- *  joystick will move the target xy,
- *  holding BL changes behaviour:
- *    joystick will control target distance and angle,
- *    slider will control grip
- *  holding BR changes behaviour:
- *    joustick will move the target xy, while keeping the b point static 
- *      (will update target distance and angle to counter the change)
- *    or 
- *    joystick will allow for flick controlling the angle of target.
- *    slider will control twist
  * 
  */
 
 void primary_control_junction(){
+  slidetogrip();
   if(menu_mode == 0){
     mode0();
   }
   else if(menu_mode == 1){
-    mode1();
-  }
-  else if(menu_mode == 2){
-    secondary_control_junction();
+    if(Esplora.readButton(SWITCH_DOWN)){
+      mode1a();
+    }
+    else{
+      mode1b();
+    }
   }
 
-  
   // data send, perhaps check for changes, maybe a changes flag from the deeper?
-}
-
-void secondary_control_junction(){
-  if(not Esplora.readButton(SWITCH_LEFT)){
-    mode3b();
-  }
-  else if (not Esplora.readButton(SWITCH_RIGHT)){
-    mode3c();
-  }
-  else{
-    mode3a();
-  }
 }
 
 void joytodrive(){
@@ -154,36 +131,29 @@ void mode0(){
   else {
     digitalWrite(13, LOW);
     joytodrive();
-    slidetogrip();
   }
 }
 
-void mode1(){
+void mode1a(){
   if(!Esplora.readButton(SWITCH_UP)){
     while(!Esplora.readButton(SWITCH_UP)){}
     menu_mode = 0;
   }
 
-  else if(!Esplora.readButton(SWITCH_DOWN)){
-    while(!Esplora.readButton(SWITCH_DOWN)){}
-    menu_mode = 2;
+  else if(!Esplora.readButton(SWITCH_LEFT)){
+    command.twist += 1;  // this needs callibration to make the speed controllable
+  }
+  else if(!Esplora.readButton(SWITCH_RIGHT)){
+    command.twist -= 1;
   }
   
   else {
     digitalWrite(13, HIGH);
     joytotarget();
-    slidetogrip();
   }
 }
 
-void mode3a(){
-
-}
-
-void mode3b(){
-
-}
-
-void mode3c(){
-
+void mode1b(){
+  command.len_a += map(Esplora.readJoystickX(), -512, 512, -1.0, 1.0);
+  command.deg_a += map(Esplora.readJoystickY(), -512, 512, -1.0, 1.0);
 }
