@@ -120,13 +120,14 @@ void arm_model_calc() {
   const int b = 105;
   const int c = 140;
 
+  float alpha = command.deg_a * M_PI/180
 
-  float bx = command.target_x + cos(command.deg_a) * (command.len_a + c); //bx = -10
-  float by = command.target_y + sin(command.deg_a) * (command.len_a + c); //by = 100
+  float bx = command.target_x + cos(alpha) * (command.len_a + c); //bx = -10
+  float by = command.target_y + sin(alpha) * (command.len_a + c); //by = 100
 
   float f  = sqrt(pow(bx, 2) + pow(by, 2)); // 99.49874371
 
-  float beta3 = M_PI / 2 - command.deg_a; // pi/2
+  float beta3 = M_PI / 2 - alpha; // pi/2
   float beta2 = M_PI / 2 - atan2(by, -bx); // 0.09966865249
   float beta1 = acos((f / b + b / f - pow(a, 2) / (f * b)) / 2); // 1.077191431
   float beta = beta1 + beta2 + beta3; // 2.74765641028
@@ -146,7 +147,7 @@ void arm_writer() {
 
   servo_wrist.writeMicroseconds(map(signals.wrist, M_PI / 2, 3 * M_PI / 2, 540, 2300));
   servo_elbow.writeMicroseconds(map(signals.elbow, 0, M_PI, 2370, 550));
-  servo_shoulder.writeMicroseconds(map(map(signals.shoulder, -M_PI/4, M_PI+M_PI/4, 500, 2500);
+  servo_shoulder.writeMicroseconds(map(signals.shoulder, -M_PI/4, M_PI+M_PI/4, 500, 2500));
 };
 
 void arm_attach() {
