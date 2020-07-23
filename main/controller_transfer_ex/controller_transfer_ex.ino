@@ -52,10 +52,10 @@ void initialize_command() {
 }
 
 void init_target(){
-  command.target_x = -150.0;
-  command.target_y = 100.0;
+  command.target_x = -150.0;  // -10
+  command.target_y = 100.0;   // 240
   command.len_a = 0.0;
-  command.deg_a = 0.0;
+  command.deg_a = 0.0;        // -90
 }
 
 
