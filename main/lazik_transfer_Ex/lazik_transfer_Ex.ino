@@ -97,8 +97,8 @@ void driver() {
 };
 
 void driver_writer() {
-  servo_track_left.writeMicroseconds(signals.track_left, 0, 512, 1500, 2500);
-  servo_track_right.writeMicroseconds(signals.track_right, 0, 512, 1500, 2500);  // values to callibrate
+  servo_left_track.writeMicroseconds(map(signals.left_track, 0, 512, 1500, 2500));
+  servo_right_track.writeMicroseconds(map(signals.right_track, 0, 512, 1500, 2500));  // values to callibrate
 };
 
 void arm_power_ctrl() {
@@ -120,21 +120,21 @@ void arm_model_calc() {
   const int b = 105;
   const int c = 140;
 
-  float alpha = command.deg_a * M_PI/180
+  float alpha = command.deg_a * M_PI/180;
 
-  float bx = command.target_x + cos(alpha) * (command.len_a + c); //bx = -10
-  float by = command.target_y + sin(alpha) * (command.len_a + c); //by = 100
+  float bx = command.target_x + cos(alpha) * (command.len_a + c); //bx = 70
+  float by = command.target_y + sin(alpha) * (command.len_a + c); //by = 70
 
-  float f  = sqrt(pow(bx, 2) + pow(by, 2)); // 99.49874371
+  float f  = sqrt(pow(bx, 2) + pow(by, 2)); // 98.994949
 
   float beta3 = M_PI / 2 - alpha; // pi/2
-  float beta2 = M_PI / 2 - atan2(by, -bx); // 0.09966865249
-  float beta1 = acos((f / b + b / f - pow(a, 2) / (f * b)) / 2); // 1.077191431
-  float beta = beta1 + beta2 + beta3; // 2.74765641028
+  float beta2 = M_PI / 2 - atan2(by, bx); // 45
+  float beta1 = acos((f / b + b / f - pow(a, 2) / (f * b)) / 2); //
+  float beta = beta1 + beta2 + beta3; // 180
 
-  float gamma = acos((a / b + b / a - (pow(bx, 2) + pow(by, 2)) / (a * b)) / 2); // 0.9872097919
+  float gamma = acos((a / b + b / a - (pow(bx, 2) + pow(by, 2)) / (a * b)) / 2); // 30
 
-  float delta = beta1 + beta2 + gamma - M_PI / 2 // 0.5932735486
+  float delta = beta1 - beta2 + gamma - M_PI / 2; // 30
 
   signals.wrist = beta;
   signals.elbow = gamma;
@@ -145,7 +145,7 @@ void arm_writer() {
   servo_grip.writeMicroseconds(map(command.grip, 0, 1024, 600, 2260));
   servo_twist.writeMicroseconds(map(command.twist, 0, 1024, 630, 2460));
 
-  servo_wrist.writeMicroseconds(map(signals.wrist, M_PI / 2, 3 * M_PI / 2, 540, 2300));
+  servo_wrist.writeMicroseconds(map(signals.wrist, M_PI / 2, M_PI + M_PI / 2, 540, 2300));
   servo_elbow.writeMicroseconds(map(signals.elbow, 0, M_PI, 2370, 550));
   servo_shoulder.writeMicroseconds(map(signals.shoulder, -M_PI/4, M_PI+M_PI/4, 500, 2500));
 };

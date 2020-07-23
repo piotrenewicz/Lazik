@@ -52,8 +52,8 @@ void initialize_command() {
 }
 
 void init_target(){
-  command.target_x = -150.0;  // -10
-  command.target_y = 100.0;   // 240
+  command.target_x = 210.0;  // 10
+  command.target_y = 70.0;   // 240
   command.len_a = 0.0;
   command.deg_a = 0.0;        // -90
 }
@@ -82,7 +82,7 @@ int menu_mode = 0;
  */
 
 void primary_control_junction(){
-  slidetogrip();
+//  slidetogrip();
   if(menu_mode == 0){
     mode0();
   }
@@ -108,8 +108,11 @@ void slidetogrip(){
 }
 
 void joytotarget(){
-  command.target_x += map(Esplora.readJoystickX(), -512, 512, -1.0, 1.0);
-  command.target_y += map(Esplora.readJoystickY(), -512, 512, -1.0, 1.0);
+  command.twist += map(Esplora.readJoystickX(), -400, 400, -5, 5);
+  command.grip += map(Esplora.readJoystickY(), -400, 400, -5, 5);
+//
+//  command.target_x += map(Esplora.readJoystickX(), -512, 512, -1.0, 1.0);
+//  command.target_y += map(Esplora.readJoystickY(), -512, 512, -1.0, 1.0);
 }
 
 void mode0(){
