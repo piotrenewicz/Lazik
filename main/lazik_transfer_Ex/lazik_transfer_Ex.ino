@@ -152,7 +152,7 @@ void arm_model_calc() {
 
   float gamma = acos((a / b + b / a - (pow(bx, 2) + pow(by, 2)) / (a * b)) / 2); // 30
 
-  float delta = beta1 - beta2 + gamma - M_PI / 2; // 30
+  float delta = beta1 + beta2 + gamma - M_PI / 2; // 30
 
   signals.wrist = beta;
   signals.elbow = gamma;
@@ -170,13 +170,17 @@ void arm_model_calc() {
   debug.delta = delta*180/M_PI;
 };
 
+float fmap(float x, float in_min, float in_max, float out_min, float out_max){
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 void arm_writer() {
   servo_grip.writeMicroseconds(map(command.grip, 0, 1024, 600, 2260));
   servo_twist.writeMicroseconds(map(command.twist, 0, 1024, 630, 2460));
 
-  servo_wrist.writeMicroseconds(map(signals.wrist, M_PI / 2, M_PI + M_PI / 2, 540, 2300));
-  servo_elbow.writeMicroseconds(map(signals.elbow, 0, M_PI, 2370, 550));
-  servo_shoulder.writeMicroseconds(map(signals.shoulder, -M_PI/4, M_PI+M_PI/4, 500, 2500));
+  servo_wrist.writeMicroseconds(fmap(signals.wrist, M_PI / 2, M_PI + M_PI / 2, 540, 2300));
+  servo_elbow.writeMicroseconds(fmap(signals.elbow, 0, M_PI, 2370, 550));
+  servo_shoulder.writeMicroseconds(fmap(signals.shoulder, -M_PI/4, M_PI+M_PI/4, 500, 2500));
 };
 
 void arm_attach() {
