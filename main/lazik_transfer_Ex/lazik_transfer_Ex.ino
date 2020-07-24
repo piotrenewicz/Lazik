@@ -43,9 +43,9 @@ RECEIVE_DATA_STRUCTURE command;
 
 
 struct SERVO_SIGNALS {
-  int16_t wrist;
-  int16_t elbow;
-  int16_t shoulder;
+  float wrist;
+  float elbow;
+  float shoulder;
   int16_t left_track;
   int16_t right_track;
 };
@@ -140,7 +140,7 @@ void arm_model_calc() {
 
   float alpha = command.deg_a * M_PI/180;
 
-  float bx = command.target_x + cos(alpha) * (command.len_a + c); //bx = 70
+  float bx = command.target_x - cos(alpha) * (command.len_a + c); //bx = 70
   float by = command.target_y + sin(alpha) * (command.len_a + c); //by = 70
 
   float f  = sqrt(pow(bx, 2) + pow(by, 2)); // 98.994949
@@ -150,14 +150,16 @@ void arm_model_calc() {
   float beta1 = acos((f / b + b / f - pow(a, 2) / (f * b)) / 2); //
   float beta = beta1 + beta2 + beta3; // 180
 
-  float gamma = acos((a / b + b / a - (pow(bx, 2) + pow(by, 2)) / (a * b)) / 2); // 30
+  float gamma = acos((2*pow(a, 2) - pow(f, 2)) / (2 * pow(a,2))); // 30
 
   float delta = beta1 + beta2 + gamma - M_PI / 2; // 30
 
-  signals.wrist = beta;
-  signals.elbow = gamma;
-  signals.shoulder = delta;
-
+  if(!(isnan(beta) || isnan(gamma) || isnan(delta))){  
+    signals.wrist = beta;
+    signals.elbow = gamma;
+    signals.shoulder = delta;
+  }
+  
   debug.alpha = alpha;
   debug.bx = bx;
   debug.by = by;
@@ -166,8 +168,11 @@ void arm_model_calc() {
   debug.beta1 = beta1*180/M_PI;
   debug.beta2 = beta2*180/M_PI;
   debug.beta3 = beta3*180/M_PI;
-  debug.gamma = gamma*180/M_PI;
-  debug.delta = delta*180/M_PI;
+//  debug.gamma = gamma*180/M_PI;
+//  debug.delta = delta*180/M_PI;
+  debug.gamma = fmap(signals.elbow, M_PI, 0, 550, 2370);
+  debug.delta = fmap(signals.shoulder, -M_PI/4, M_PI+M_PI/4, 500, 2500);
+
 };
 
 float fmap(float x, float in_min, float in_max, float out_min, float out_max){
@@ -178,9 +183,9 @@ void arm_writer() {
   servo_grip.writeMicroseconds(map(command.grip, 0, 1024, 600, 2260));
   servo_twist.writeMicroseconds(map(command.twist, 0, 1024, 630, 2460));
 
-  servo_wrist.writeMicroseconds(fmap(signals.wrist, M_PI / 2, M_PI + M_PI / 2, 540, 2300));
-  servo_elbow.writeMicroseconds(fmap(signals.elbow, 0, M_PI, 2370, 550));
-  servo_shoulder.writeMicroseconds(fmap(signals.shoulder, -M_PI/4, M_PI+M_PI/4, 500, 2500));
+  servo_wrist.writeMicroseconds(int(fmap(signals.wrist, M_PI / 2, M_PI + M_PI / 2, 540, 2300)));
+  servo_elbow.writeMicroseconds(int(fmap(signals.elbow, M_PI, 0, 550, 2370)));
+  servo_shoulder.writeMicroseconds(int(fmap(signals.shoulder, -M_PI/4, M_PI+M_PI/4, 500, 2500)));
 };
 
 void arm_attach() {

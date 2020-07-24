@@ -44,7 +44,7 @@ void setup() {
   Serial1.begin(9600);
   Serial.begin(9600);
   ET.begin(details(command), &Serial1);
-//  ETdebug.begin(details(debug), &Serial1);/
+  ETdebug.begin(details(debug), &Serial1);
   pinMode(13, OUTPUT);
 }
 
@@ -54,7 +54,7 @@ void loop() {
   ET.sendData();
   delay(40);
   for(int i=0; i<4; i++){
-//    pass_debug_through();/
+    pass_debug_through();
   }
 }
 
@@ -113,12 +113,19 @@ void initialize_command() {
 }
 
 void init_target(){
-  command.target_x = 210.0;  // 10
-  command.target_y = 70.0;   // 240
+  command.target_x = 2.0;  // 10
+  command.target_y = 155.0;   // 240
   command.len_a = 0.0;
-  command.deg_a = 0.0;        // -90
+  command.deg_a = -80.0;        // -90
 }
 
+
+void ready_target(){
+  command.target_x = 128.0;
+  command.target_y = 65.0;
+  command.len_a = 0.0;
+  command.deg_a = -11.0;
+}
 
 
 
@@ -143,7 +150,7 @@ int menu_mode = 0;
  */
 
 void primary_control_junction(){
-//  slidetogrip();
+  slidetogrip();
   if(menu_mode == 0){
     mode0();
   }
@@ -190,8 +197,13 @@ void mode0(){
     init_target();
   }
 
-  else if(!Esplora.readButton(SWITCH_RIGHT)){
+  if(!Esplora.readButton(SWITCH_RIGHT)){
     while(!Esplora.readButton(SWITCH_RIGHT)){}
+    ready_target();
+  }
+  
+  else if(!Esplora.readButton(SWITCH_DOWN)){
+    while(!Esplora.readButton(SWITCH_DOWN)){}
     command.arm_power = !command.arm_power;
   }
 
@@ -213,10 +225,10 @@ void mode1a(){
   }
 
   else if(!Esplora.readButton(SWITCH_LEFT)){
-    command.twist += 1;  // this needs callibration to make the speed controllable
+    command.twist += 5;  // this needs callibration to make the speed controllable
   }
   else if(!Esplora.readButton(SWITCH_RIGHT)){
-    command.twist -= 1;
+    command.twist -= 5;
   }
   
   else {
