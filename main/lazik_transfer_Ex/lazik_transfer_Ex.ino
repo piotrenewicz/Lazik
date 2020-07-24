@@ -3,6 +3,7 @@
 #include <math.h>
 
 EasyTransfer ET;
+EasyTransfer ETdebug;
 
 Servo servo_grip;
 Servo servo_twist;
@@ -51,10 +52,26 @@ struct SERVO_SIGNALS {
 SERVO_SIGNALS signals;
 
 
+struct SEND_DATA_STRUCTURE {
+  float alpha;
+  float bx;
+  float by;
+  float f;
+  float beta;
+  float beta1;
+  float beta2;
+  float beta3;
+  float gamma;
+  float delta;
+};
+SEND_DATA_STRUCTURE debug;
+
+
 void setup() {
   pinMode(13, OUTPUT);
   Serial.begin(9600);
   ET.begin(details(command), &Serial);
+  ETdebug.begin(details(debug), &Serial);
 
   // remember to servo attach the tracks here
 };
@@ -66,6 +83,7 @@ void loop() {
   if (ET.receiveData()) {
     digitalWrite(13, command.arm_power);
     primary_parser();
+    ETdebug.sendData();
 
 
   }
@@ -139,6 +157,17 @@ void arm_model_calc() {
   signals.wrist = beta;
   signals.elbow = gamma;
   signals.shoulder = delta;
+
+  debug.alpha = alpha;
+  debug.bx = bx;
+  debug.by = by;
+  debug.f = f;
+  debug.beta = beta*180/M_PI;
+  debug.beta1 = beta1*180/M_PI;
+  debug.beta2 = beta2*180/M_PI;
+  debug.beta3 = beta3*180/M_PI;
+  debug.gamma = gamma*180/M_PI;
+  debug.delta = delta*180/M_PI;
 };
 
 void arm_writer() {

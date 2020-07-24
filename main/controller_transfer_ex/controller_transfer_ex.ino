@@ -4,6 +4,7 @@
 
 
 EasyTransfer ET;
+EasyTransfer ETdebug;
 
 struct SEND_DATA_STRUCTURE {
   //put your variable definitions here for the data you want to send
@@ -23,11 +24,27 @@ struct SEND_DATA_STRUCTURE {
 };
 SEND_DATA_STRUCTURE command;
 
+struct RECEIVE_DATA_STRUCTURE{
+  float alpha;
+  float bx;
+  float by;
+  float f;
+  float beta;
+  float beta1;
+  float beta2;
+  float beta3;
+  float gamma;
+  float delta;
+};
+RECEIVE_DATA_STRUCTURE debug;
+
 
 void setup() {
   initialize_command(); //do not use the usb serial, ... Best way to avoid corrupting the bootloader
   Serial1.begin(9600);
+  Serial.begin(9600);
   ET.begin(details(command), &Serial1);
+//  ETdebug.begin(details(debug), &Serial1);/
   pinMode(13, OUTPUT);
 }
 
@@ -36,8 +53,52 @@ void loop() {
   primary_control_junction();
   ET.sendData();
   delay(40);
+  for(int i=0; i<4; i++){
+//    pass_debug_through();/
+  }
 }
 
+void debug_tmp(){
+  Serial.print("trg_x=");
+  Serial.println(command.target_x);
+  Serial.print("trg_y=");
+  Serial.println(command.target_y);
+  Serial.print("len_a=");
+  Serial.println(command.len_a);
+  Serial.print("deg_a=");
+  Serial.println(command.deg_a);
+}
+
+void pass_debug_through(){
+  if(ETdebug.receiveData()){
+    Serial.println("=====================");
+    
+    Serial.print("alpha=");
+    Serial.println(debug.alpha);
+    Serial.print("bx   =");
+    Serial.println(debug.bx);
+    Serial.print("by   =");
+    Serial.println(debug.by);
+    Serial.print("f    =");
+    Serial.println(debug.f);
+    Serial.print("beta =");
+    Serial.println(debug.beta);
+    Serial.print("beta1=");
+    Serial.println(debug.beta1);
+    Serial.print("beta2=");
+    Serial.println(debug.beta2);
+    Serial.print("beta3=");
+    Serial.println(debug.beta3);
+    Serial.print("gamma=");
+    Serial.println(debug.gamma);
+    Serial.print("delta=");
+    Serial.println(debug.delta);
+
+    Serial.println("=====================");
+    debug_tmp();
+    Serial.println("=====================");
+  }
+}
 
 void initialize_command() {
   init_target();
@@ -98,9 +159,20 @@ void primary_control_junction(){
   // data send, perhaps check for changes, maybe a changes flag from the deeper?
 }
 
+int apply_deadzone(int in){
+  int deadzone = 10;
+  if(abs(in) < deadzone){
+    return 0;
+  }
+  else{
+    return in;
+  }
+  
+}
+
 void joytodrive(){
-  command.turn = Esplora.readJoystickX();
-  command.drive = Esplora.readJoystickY();
+  command.turn = apply_deadzone(Esplora.readJoystickX());
+  command.drive = apply_deadzone(Esplora.readJoystickY());
 }
 
 void slidetogrip(){
@@ -108,11 +180,8 @@ void slidetogrip(){
 }
 
 void joytotarget(){
-  command.twist += map(Esplora.readJoystickX(), -400, 400, -5, 5);
-  command.grip += map(Esplora.readJoystickY(), -400, 400, -5, 5);
-//
-//  command.target_x += map(Esplora.readJoystickX(), -512, 512, -1.0, 1.0);
-//  command.target_y += map(Esplora.readJoystickY(), -512, 512, -1.0, 1.0);
+  command.target_x -= apply_deadzone(Esplora.readJoystickX())/100.0;
+  command.target_y -= apply_deadzone(Esplora.readJoystickY())/100.0;
 }
 
 void mode0(){
@@ -157,6 +226,6 @@ void mode1a(){
 }
 
 void mode1b(){
-  command.len_a += map(Esplora.readJoystickX(), -512, 512, -1.0, 1.0);
-  command.deg_a += map(Esplora.readJoystickY(), -512, 512, -1.0, 1.0);
+  command.len_a -= apply_deadzone(Esplora.readJoystickX())/100.0;
+  command.deg_a -= apply_deadzone(Esplora.readJoystickY())/100.0;
 }
