@@ -220,8 +220,8 @@ void move()
 {
   if (command.drive != 0 or command.turn !=0)
   {
-    servo_left_track.attach();// pin /////////////////////////////////////////////////////////////////////////
-    servo_right_track.attach();// pin///////////////////////////////////////////////////////////////////////// 
+    servo_left_track.attach(9);// pin /////////////////////////////////////////////////////////////////////////
+    servo_right_track.attach(10);// pin///////////////////////////////////////////////////////////////////////// 
     servo_left_track.writeMicroseconds(map(VL(command.turn,command.drive),-3072,3072,500,2500));
     servo_right_track.writeMicroseconds(map(VR(command.turn,command.drive),-3072,3072,500,2500));
   }
