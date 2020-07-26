@@ -113,10 +113,10 @@ void initialize_command() {
 }
 
 void init_target(){
-  command.target_x = 2.0;  // 10
-  command.target_y = 155.0;   // 240
-  command.len_a = 0.0;
-  command.deg_a = -80.0;        // -90
+  command.target_x = -3.36;  // 10
+  command.target_y = 77.69;   // 240
+  command.len_a = -78.90;
+  command.deg_a = -91.39;        // -90
 }
 
 
@@ -178,8 +178,8 @@ int apply_deadzone(int in){
 }
 
 void joytodrive(){
-  command.turn = apply_deadzone(Esplora.readJoystickX());
-  command.drive = apply_deadzone(Esplora.readJoystickY());
+  command.turn = -apply_deadzone(Esplora.readJoystickX());
+  command.drive = -apply_deadzone(Esplora.readJoystickY());
 }
 
 void slidetogrip(){

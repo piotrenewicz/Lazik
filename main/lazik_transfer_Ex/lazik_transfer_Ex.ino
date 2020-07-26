@@ -92,11 +92,10 @@ void loop() {
 };
 
 
+
+
 void primary_parser() {
-  driver();
-  if (current_drive_power) {
-    driver_writer();
-  }
+  move();
   arm_power_ctrl();
   if (current_arm_power) {
     arm_model_calc();
@@ -203,4 +202,29 @@ void arm_detach() {
   servo_wrist.detach();  // S3003 hand pivot
   servo_elbow.detach();  // MG946R elbow
   servo_shoulder.detach(); // LF-20MG shoulder
+}
+int VL(int omega,int v)
+{
+  return (2*v + omega*2)/4;
+}
+
+int VR(int omega,int v)
+{
+  return (2*v - omega*2)/4;
+}
+
+void move()
+{
+  if (command.drive != 0 or command.turn !=0)
+  {
+    servo_left_track.attach(9);// pin /////////////////////////////////////////////////////////////////////////
+    servo_right_track.attach(10);// pin///////////////////////////////////////////////////////////////////////// 
+    servo_left_track.writeMicroseconds(map(VL(command.turn,command.drive),-512,512,2500,500));
+    servo_right_track.writeMicroseconds(map(VR(command.turn,command.drive),-512,512,500,2500));
+  }
+  else
+  {
+    servo_left_track.detach();// pin /////////////////////////////////////////////////////////////////////////
+    servo_right_track.detach();// pin /////////////////////////////////////////////////////////////////////////
+  }
 }
